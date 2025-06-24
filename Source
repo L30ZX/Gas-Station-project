@@ -1,0 +1,168 @@
+#include <iostream>
+#include <fstream> 
+#include <cstdlib>
+#include <string>
+#include <iomanip>
+using namespace std;
+
+void display_menu();
+void fuel_price();
+void buy_fuel();
+void viewtotalSales();
+void write_sales_to_file(int i,float liters);
+void open_sales_file();
+
+const int SIZE = 3;
+
+string fuelNames[SIZE] = { "RON95","RON97","DIESEL" };
+float fuelPrices[SIZE] = { 2.05, 3.25, 2.95 };
+float fuelSold[SIZE] = { 0, 0, 0 };
+float totalsales = 0.0;
+
+void main()
+{
+    int choice;
+    do
+    {
+        display_menu();
+        cin >> choice;
+        switch (choice)
+        {
+        case 1:fuel_price();
+            break;
+        case 2:buy_fuel();
+            break;
+        case 3:viewtotalSales();
+            break;
+        case 4:open_sales_file();
+            break;
+        case 5://exit program
+            cout << "\n======== Thank You ========" << endl;
+            break;
+        default:
+            cout << "\nInvalid choice!\n" << endl;
+            break;
+        }
+
+    } while (choice != 5);
+}
+
+void display_menu()
+{
+    cout << "\n======================\n" << endl;
+
+    cout << "1) Fuel Prices" << endl;
+    cout << "2) Buy Fuel" << endl;
+    cout << "3) View Total Sales" << endl;
+    cout << "4) Open sales file" << endl;
+    cout << "5) Exit\n" << endl;
+
+    cout << "======================" << endl;
+}
+
+void fuel_price()
+{
+    cout << endl;
+    for (int i = 0; i < SIZE; i++)
+    {
+        cout << fuelNames[i] << " = " << fuelPrices[i] << "/L" << endl;
+    }
+    cout << endl;
+}
+
+void buy_fuel()
+{
+    int choice;
+    float liters;
+    cout << endl;
+    for (int i = 0; i < SIZE; i++)
+    {
+        cout << (i + 1) << ")" << fuelNames[i] << " - " << fuelPrices[i] << endl;
+    }
+    cout << "Please choose a fuel type ( 1 - 3 ): ";
+    cin >> choice;
+    if (choice < 1 || choice > SIZE)
+    {
+        cout << "Invalid choice. Please choose a valid fuel type (1 - " << SIZE << ")." << endl;
+        return;
+    }
+    cout << endl << "Please enter the number of liters you want: ";
+    cin >> liters;
+
+    if (liters <= 0)
+    {
+        cout << "Invalid amount of fuel. Please enter a positive number." << endl;
+        return;
+    }
+
+    float price = fuelPrices[choice - 1] * liters;
+    char Y_N;
+
+    cout << "\nPlease enter Y to confirm or N to cancel : ";
+
+    cin >> Y_N;
+
+    if (Y_N == 'y' || Y_N == 'Y')
+    {
+        cout << "You have purchased ";
+        cout << liters << "l of " << fuelNames[choice - 1] << "." << " \nThe total is" << " RM" << fixed << setprecision(2) << price << "." << endl;
+        cout << endl;
+    }
+    else {
+        cout << "Your choice have been canceled ";
+        return;
+    }
+
+    // Update total sales
+    int mark = choice - 1,
+        sales = liters * fuelPrices[mark];
+    fuelSold[mark] += liters;
+    totalsales += sales;
+
+    // Write sales data to file
+    write_sales_to_file(mark,liters);
+}
+
+void viewtotalSales()
+{
+    for (int i = 0; i < SIZE; i++) {
+        cout << fuelNames[i] << ": " << fuelSold[i] << " liters sold, RM";  
+         cout<<fixed << setprecision(2) << (fuelSold[i] * fuelPrices[i]) << " earned" << endl;
+    }
+}
+
+void write_sales_to_file(int i,float liters)
+{
+    ofstream outputFile("totalsales.txt", ios::app);
+    if (!outputFile)
+    {
+        cerr << "File could not be opened!" << endl;
+        return;
+    }
+
+    // Write total sales to file
+    {
+        outputFile << fuelNames[i] << ": " << liters << " liters sold, RM"
+            << (fuelSold[i] * fuelPrices[i]) << " earned" << endl;
+
+        outputFile << endl;
+    }
+}
+void open_sales_file()
+{
+    ifstream inputFile("totalsales.txt", ios::in);
+    if (!inputFile)
+    {
+        cerr << "File could not be opened!" << endl;
+        return;
+    }
+
+    string line;
+    while (getline(inputFile, line))
+    {
+        cout << line << endl;
+    }
+
+    inputFile.close();
+}
+    
